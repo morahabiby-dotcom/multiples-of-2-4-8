@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Times Table Fun: 2s, 4s & 8s</title><style>
+:root{--bg:#fff7e0;--card:#fff;--tx:#2b2d42;--mut:#666a80;--ok:#2bb673;--no:#f5a623;--b0:#2f7dd1;--b1:#7a4fd6;--b2:#d6458a;--go:#ff7a59;box-sizing:border-box;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1d2e;--card:#272a42;--tx:#f4f4fb;--mut:#b4b7cc;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1b1d2e;--card:#272a42;--tx:#f4f4fb;--mut:#b4b7cc;color-scheme:dark}
+*{box-sizing:inherit}html,body{margin:0}body{background:var(--bg);color:var(--tx);font-family:"Comic Sans MS","Trebuchet MS",system-ui,sans-serif;font-size:20px;min-height:100vh}
+main{max-width:640px;margin:0 auto;padding:14px}.card{background:var(--card);border-radius:24px;padding:20px;box-shadow:0 4px 14px #0002;text-align:center}
+h1{font-size:1.7rem;margin:.2em 0}.big{font-size:3rem}.bar{display:flex;justify-content:space-between;font-weight:700;margin-bottom:10px}
+.pr{height:12px;background:#0002;border-radius:9px;margin-bottom:12px;overflow:hidden}.pr i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.q{font-size:1.7rem;font-weight:700;margin:8px 0}.vis{font-size:1.6rem;line-height:1.5;margin:6px 0}.ans{display:grid;gap:12px;margin-top:14px}
+button{font:inherit;font-size:1.6rem;font-weight:700;color:#fff;border:0;border-radius:20px;padding:16px;cursor:pointer;min-height:64px}
+.a0{background:var(--b0)}.a1{background:var(--b1)}.a2{background:var(--b2)}button.ok{background:var(--ok)!important}button.no{background:var(--no)!important}button:disabled{opacity:.85;cursor:default}
+.go{background:var(--go);margin-top:14px;width:100%}.fb{margin-top:14px;font-size:1.2rem;text-align:left;background:#0001;border-radius:16px;padding:12px}.hide{display:none}p{color:var(--mut)}
+</style></head><body><main>
+<div id="intro" class="card"><div class="big">🐝🐙</div><h1>Times Table Fun: 2s, 4s & 8s</h1><p>Multiples of 2, 4 and 8. Remember: 4s are double the 2s, and 8s are double the 4s!</p><button class="go" onclick="start()">Let’s play! 🚀</button></div>
+<div id="play" class="hide"><div class="bar"><span id="st">⭐ 0</span><span id="nm">1 / 20</span><span id="tm">⏱️ 0:00</span></div><div class="pr"><i id="pb"></i></div>
+<div class="card"><div class="q" id="q"></div><div class="vis" id="v"></div><div class="ans" id="an"></div><div class="fb hide" id="fb"></div><button class="go hide" id="nx" onclick="i++;next()">Next ➡️</button></div></div>
+<div id="end" class="card hide"><div class="big" id="ee">🏆</div><h1 id="em"></h1><p id="es" style="font-size:1.4rem"></p><button class="go" onclick="start()">Play again 🔁</button></div>
+</main><script>
+const C={bases:[2,4,8],lo:2,hi:4},$=id=>document.getElementById(id),R=n=>Math.floor(Math.random()*n),ri=(a,b)=>a+R(b-a+1);
+const sh=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=R(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+function nums(c,b){const s=[c];for(const x of sh([c+b,c-b,c+1,c-1,c+2,c-2,c+3,c+10,c-10,c+2*b]))if(x>0&&!s.includes(x)&&s.length<3)s.push(x);return s}
+function mc(t,v,c,b,h){const o=sh(nums(c,b));return{t,v,o:o.map(String),a:o.indexOf(c),h,e:c}}
+const pick=()=>C.bases[R(3)],seq=(b,n)=>Array.from({length:n},(_,k)=>b*(k+1)).join(", ");
+function hint(b,n){return b>2?`${b} × ${n} is double ${b/2} × ${n}. ${b/2} × ${n} = ${b/2*n}, and double ${b/2*n} is ${b*n}.`:`Count in ${b}s: ${seq(b,n)}.`}
+const W=[(b,n)=>`Maris has ${n} bags with ${b} cookies in each bag. How many cookies? 🍪`,(b,n)=>`Zara builds ${n} rows with ${b} bricks in each row. How many bricks? 🧱`,(b,n)=>`Jack has ${n} packs with ${b} pencils in each pack. How many pencils? ✏️`];
+const G={
+mult(){const b=pick(),n=ri(2,10);return mc(`${b} × ${n} = ?`,"",b*n,b,hint(b,n))},
+missing(){const b=pick(),n=ri(2,10);return mc(`${b} × ? = ${b*n}`,"",n,1,`Count in ${b}s until you reach ${b*n}: ${seq(b,n)}. How many jumps?`)},
+dbl(){const n=ri(2,10);return mc(`${C.lo} × ${n} = ${C.lo*n}, so ${C.hi} × ${n} = ?`,"",C.hi*n,C.hi,`The group size doubles, so the total doubles! Double ${C.lo*n} = ${C.hi*n}.`)},
+tf(){const b=pick(),n=ri(2,10),ok=R(2)===0,r=ok?b*n:b*n+(R(2)?b:-b);return{t:"True or false?",v:`${b} × ${n} = ${r}`,o:["True ✅","False ❌"],a:ok?0:1,h:hint(b,n),e:`${b} × ${n} = ${b*n}`}},
+swap(){const b=pick(),n=ri(2,10);return mc(`${b} × ${n} = ${b*n}, so ${n} × ${b} = ?`,"",b*n,b,"We can multiply in any order. The answer stays the same!")},
+array(){const b=pick(),m=ri(2,4),e=["⭐","🍎","🐞","🌼"][R(4)];return mc("How many are there?",Array(m).fill(Array(b).fill(e).join("")).join("<br>"),b*m,b,`There are ${m} rows of ${b}. Count in ${b}s: ${seq(b,m)}.`)},
+word(){const b=pick(),n=ri(2,6);return mc(W[R(3)](b,n),"",b*n,b,`Draw ${n} groups of ${b}, then count in ${b}s: ${seq(b,n)}.`)},
+family(){const b=pick(),n=ri(2,10),p=b*n;return mc("Complete the fact family 👨‍👩‍👧",`${b} × ${n} = ${p}<br>${n} × ${b} = ${p}<br>${p} ÷ ${b} = ?<br>${p} ÷ ${n} = ${b}`,n,1,`Division undoes multiplication. ${b} × ${n} = ${p}, so ${p} ÷ ${b} = ${n}.`)},
+count(){const b=pick(),a=b*ri(1,4);return mc(`Count in ${b}s: ${a}, ${a+b}, ${a+2*b}, ?, ${a+4*b}`,"",a+3*b,b,`Add ${b} each time. ${a+2*b} + ${b} = ${a+3*b}.`)},
+multof(){const b=pick(),c=b*ri(1,10),o=[c];for(const x of sh([c+1,c-1,c+2,c+3,c+4]))if(x>0&&x%b&&o.length<3)o.push(x);const s=sh(o);return{t:`Which number is in the ${b} times table?`,v:"",o:s.map(String),a:s.indexOf(c),h:`Count in ${b}s: ${seq(b,6)}…`,e:c}},
+same(){const m=ri(1,5);return mc(`${C.lo} × ${2*m} = ${C.hi} × ?`,"",m,1,`${C.hi} is double ${C.lo}, so we need half as many groups. Half of ${2*m} is ${m}.`)}};
+const ORD="mult dbl tf array word missing swap family count multof mult dbl tf array word missing same family count multof".split(" ");
+function build(){const seen=new Set(),r=[];for(const t of sh(ORD)){let q,k=0;do{const p=[[2,4],[4,8]][R(2)];C.lo=p[0];C.hi=p[1];q=G[t]();k++}while(seen.has(q.t+q.v)&&k<40);seen.add(q.t+q.v);r.push(q)}return r}
+let qs,i,sc,sec,tm,q;const fmt=s=>Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+function show(x){for(const k of["intro","play","end"])$(k).classList.toggle("hide",k!==x)}
+function start(){qs=build();i=0;sc=0;sec=0;clearInterval(tm);$("tm").textContent="⏱️ 0:00";tm=setInterval(()=>{sec++;$("tm").textContent="⏱️ "+fmt(sec)},1000);show("play");next()}
+function next(){if(i>=20)return end();q=qs[i];$("q").textContent=q.t;$("v").innerHTML=q.v;$("st").textContent="⭐ "+sc;$("nm").textContent=(i+1)+" / 20";$("pb").style.width=(i/20*100)+"%";
+$("fb").classList.add("hide");$("nx").classList.add("hide");const an=$("an");an.innerHTML="";
+q.o.forEach((t,k)=>{const b=document.createElement("button");b.className="a"+k;b.textContent=t;b.onclick=()=>pickA(k);an.appendChild(b)})}
+function pickA(k){const bs=$("an").children;for(const b of bs)b.disabled=true;bs[q.a].classList.add("ok");const f=$("fb");f.classList.remove("hide");
+if(k===q.a){sc++;f.textContent=["Great job! 🌟","Super! 🎉","Brilliant! 👏","Well done! 💪","Amazing! 🚀"][R(5)]}
+else{bs[k].classList.add("no");f.innerHTML="Nice try! 💛 Let’s learn it together.<br>💡 "+q.h+"<br>✅ The answer is <b>"+q.e+"</b>."}
+$("st").textContent="⭐ "+sc;$("nx").textContent=i===19?"See my score 🏆":"Next ➡️";$("nx").classList.remove("hide")}
+function end(){clearInterval(tm);show("end");$("ee").textContent=sc>=18?"🏆":sc>=12?"🌟":"🌈";
+$("em").textContent=sc>=18?"You are a Maths superstar!":sc>=12?"Wonderful work!":sc>=6?"Good effort, keep going!":"Every try makes you stronger!";
+$("es").innerHTML="⭐ "+sc+" out of 20<br>⏱️ "+fmt(sec)+"<br>Practise again and collect more stars! 💪"}
+</script></body></html>
